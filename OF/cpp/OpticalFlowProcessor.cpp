@@ -122,6 +122,10 @@ void OpticalFlowProcessor::matching() {
 			
 			// If the 1st match is significantly (25%) better than the 2nd
 			matches.push_back(temp_matches[i][0]);
+
+			// NB : each DMatch instance in matches contains 
+			//  - Query index : queryIdx
+			//  - Train index : trainIdx
 		}	
 	}
 
@@ -131,6 +135,8 @@ void OpticalFlowProcessor::process() {
 
 	// DOC :
 	// Full calculation of displacement info based on sift and red channel
+	// 
+	// NB : x,y,z is the camera axis. x is right, y is down, z is fwd
 
 	matching();	
 
@@ -141,7 +147,7 @@ void OpticalFlowProcessor::process() {
 
 	Mat frame_plot = frame.get_gray();
 
-	// Darkens all none feature zones in the frame.
+	// Darkens all masked zones in the frame (mask contains static zones)
 	addWeighted(frame_plot, 1, 255*(1-frame.get_mask()), -0.3, 0, frame_plot);	
 
 	// Converts grayscale back to RGB (how da hell ?!)
@@ -160,7 +166,7 @@ void OpticalFlowProcessor::process() {
 		matched_keypoint_frame[i] = keypoint_frame[matches[i].trainIdx];
 	}
 
-	//calculation on Z relative displacement with red component
+	// Calculation on Z relative displacement with red component
 	Mat red_channel_frame;
 	frame.get_red_channel().convertTo(red_channel_frame, CV_32FC1);
 
@@ -188,14 +194,13 @@ void OpticalFlowProcessor::process() {
 
 
 		if(!((abs(red_channel_frame.size[1] - (point_f.x+5))<params["radius"]) or
-					(abs(red_channel_frame.size[0] - (point_f.y+5))<params["radius"]) or
-					(abs(red_channel_ref.size[1] - (point_r.x+5))<params["radius"]) or
-					(abs(red_channel_ref.size[0] - (point_r.y+5))<params["radius"])
-					or
-					(abs(0 - (point_f.x-5))<params["radius"]) or
-					(abs(0 - (point_f.y-5))<params["radius"]) or
-					(abs(0 - (point_r.x-5))<params["radius"]) or
-					(abs(0 - (point_r.y-5))<params["radius"]))){
+				(abs(red_channel_frame.size[0] - (point_f.y+5))<params["radius"]) or
+				(abs(red_channel_ref.size[1] - (point_r.x+5))<params["radius"]) or
+				(abs(red_channel_ref.size[0] - (point_r.y+5))<params["radius"]) or
+				(abs(0 - (point_f.x-5))<params["radius"]) or
+				(abs(0 - (point_f.y-5))<params["radius"]) or
+				(abs(0 - (point_r.x-5))<params["radius"]) or
+				(abs(0 - (point_r.y-5))<params["radius"]))){ // Bound check ..?
 
 			int size_loc = 0;
 			float sum_loc = 0;
@@ -210,15 +215,16 @@ void OpticalFlowProcessor::process() {
 					color = Vec3b{255, 255, 204}; 
 				}
 			}
-			mean_loc.push_back(sum_loc/size_loc);
+			mean_loc.push_back(sum_loc/size_loc); // mean of red_frame - red_ref over the 2radius*2radius square around the i-th keypoint
 		}
 	}
 
+	// Vz <-- mean_loc[milieu] (???!!!)
 	sort(mean_loc.begin(), mean_loc.end());
 	if (mean_loc.size()%2==0){Vel[2]=(mean_loc[mean_loc.size()/2]+mean_loc[mean_loc.size()/2+1])/2;}
 	else {Vel[2]=mean_loc[mean_loc.size()/2];}
 
-	//Calculation along X and Y axis
+	// Calculation along X and Y axis
 	vector<float> x(x_frame.size());
 	vector<float> y(y_frame.size());
 
