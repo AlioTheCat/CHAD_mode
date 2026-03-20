@@ -54,15 +54,27 @@ VideoStreamWidget::VideoStreamWidget(string src){
 }
 
 void VideoStreamWidget::start(){
+
+	// ### DOC
+	// Starts the video gathering and puts it in background.
+
+
 	t = thread(&VideoStreamWidget::run, this);
 	t.detach();
 }
 
 void VideoStreamWidget::run(){
+
+	// ### DOC
+	// For video flux only (?)
+	// Reads the last frame and updates V.frame
+
+	
 	Mat frame_temp;
 	while (is_open) {
 			int status_temp = cap.read(frame_temp);
 			{
+				// as soon as a frame is read, wait until it's succesfully saved and status gets correctly updated
 				lock_guard<mutex> guard(mut);
 				status = status_temp;
 				frame_temp.copyTo(frame);
@@ -75,6 +87,7 @@ void VideoStreamWidget::run(){
 
 int VideoStreamWidget::get_frame(Mat& frame){
 	
+	// ###############  only executes if source is a video file ############### //   
 	if (is_video) {
 		Mat temp_frame;
 		int temp_status;
@@ -91,11 +104,14 @@ int VideoStreamWidget::get_frame(Mat& frame){
 
 		return 0;
 	}
+	// ######################################################################## //   
 
+
+
+	lock_guard<mutex> guard(mut); // waits that the current frame reading process terminates
 	
-	lock_guard<mutex> guard(mut);
 	int i=0;
-	if (status == 0){
+	if (status == 0){ // if the last frame reading in run() failed
 		i=1;
 	}
 	else if (frame.empty()) {

@@ -53,9 +53,12 @@ void OpticalFlowProcessor::start(){ //Add in another thread ?
 void OpticalFlowProcessor::run(){
 	while(1){
 		int status = V.get_frame(frame_rgb);
+		
 		if (status == 0){
-			frame = Image(frame_rgb);
+			// ---> image got read correctly |
 
+			frame = Image(frame_rgb);
+			
 			//add to ref if there isn't one
 			if (reference.empty()){
 				set_ref();
@@ -65,7 +68,10 @@ void OpticalFlowProcessor::run(){
 
 
 		}
+
 		else {
+			// ---> waits for the next frame |
+
 			this_thread::sleep_for(chrono::milliseconds(100));
 			continue;}
 	}
