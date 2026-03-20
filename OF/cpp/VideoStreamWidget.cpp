@@ -87,7 +87,7 @@ void VideoStreamWidget::run(){
 
 int VideoStreamWidget::get_frame(Mat& frame){
 	
-	// ###############  only executes if source is a video file ############### //   
+	// ###############  only executes if source is a VIDEO FILE ############### //   
 	if (is_video) {
 		Mat temp_frame;
 		int temp_status;
@@ -108,16 +108,20 @@ int VideoStreamWidget::get_frame(Mat& frame){
 
 
 
-	lock_guard<mutex> guard(mut); // waits that the current frame reading process terminates
+	lock_guard<mutex> guard(mut); // waits for the current frame reading process to terminate
 	
-	int i=0;
-	if (status == 0){ // if the last frame reading in run() failed
+
+	int i=0; // <=> Everything went fine
+	
+	if (status == 0){ // <=> last frame reading in run() failed
 		i=1;
 	}
-	else if (frame.empty()) {
+	
+	else if (frame.empty()) { // <=> last frame read is empty
 		i=2;
 	}
-	frame = this->frame;
+	
+	frame = this->frame; // update V.frame
 	return i;
 	
 }	

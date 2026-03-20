@@ -20,6 +20,12 @@ OpticalFlowProcessor::OpticalFlowProcessor(string src,
 		int height,
 		int width,
 		string fourcc_):
+	
+	// DOC :
+	// 	- Initialize VideoStreamWidget V with args
+	//  - Start stream in a thread
+	//  - Start web process
+	
 	V{src, apiPref, framerate, height, width, fourcc_}
 {
 
@@ -47,19 +53,25 @@ void OpticalFlowProcessor::start_web(){
 }
 
 void OpticalFlowProcessor::start(){ //Add in another thread ?
+
+	// Questioning the utility of this function...
+	// Might give room to implement other startup processes ?
+	// But why not in the constructor directly ?
+
 	run();
 }
 
 void OpticalFlowProcessor::run(){
+
 	while(1){
 		int status = V.get_frame(frame_rgb);
 		
 		if (status == 0){
-			// ---> image got read correctly |
+			// <=> image got read correctly
 
-			frame = Image(frame_rgb);
+			frame = Image(frame_rgb); // constructor automatically does sift and red extraction
 			
-			//add to ref if there isn't one
+			// add to ref if there isn't one
 			if (reference.empty()){
 				set_ref();
 			}
@@ -70,7 +82,7 @@ void OpticalFlowProcessor::run(){
 		}
 
 		else {
-			// ---> waits for the next frame |
+			// <=> waits for the next frame
 
 			this_thread::sleep_for(chrono::milliseconds(100));
 			continue;}
@@ -79,12 +91,23 @@ void OpticalFlowProcessor::run(){
 
 void OpticalFlowProcessor::set_ref() {
 
+	// DOC :
+	// Defines the reference frame (used for displacement comparison)
+	// Is only used at mode startup (when reference is empty)
+	// 
+	// QUESTION : Does it happen everytime the mode is activated ? (It should)
+
 	lock_guard<mutex> guard(reference_mut);
 	reference = frame;
 	cout<<"New ref"<<endl;
 }
 
 void OpticalFlowProcessor::matching() {
+
+	// DOC :
+	// Matches reference and frame features using knnMatch (k=2)
+	// Could test other metrics and matchers ?
+
 	matches.clear();
 	vector<vector<DMatch>> temp_matches;
 
@@ -92,9 +115,12 @@ void OpticalFlowProcessor::matching() {
 		return;
 	}
 	matcher->knnMatch(reference.get_descriptors(), frame.get_descriptors(), temp_matches, 2);
+	// temp_matches[i] contains the 2 best matches for reference's i-th descriptor
 
 	for (int i=0; i<temp_matches.size(); i++) {
 		if (temp_matches[i][0].distance <  0.75 * temp_matches[i][1].distance){
+			
+			// If the 1st match is significantly (25%) better than the 2nd
 			matches.push_back(temp_matches[i][0]);
 		}	
 	}
@@ -102,6 +128,9 @@ void OpticalFlowProcessor::matching() {
 }
 
 void OpticalFlowProcessor::process() {
+
+	// DOC :
+	// Full calculation of displacement info based on sift and red channel
 
 	matching();	
 
@@ -112,8 +141,10 @@ void OpticalFlowProcessor::process() {
 
 	Mat frame_plot = frame.get_gray();
 
+	// Darkens all none feature zones in the frame.
 	addWeighted(frame_plot, 1, 255*(1-frame.get_mask()), -0.3, 0, frame_plot);	
 
+	// Converts grayscale back to RGB (how da hell ?!)
 	cvtColor(frame_plot, frame_plot,COLOR_GRAY2BGR);
 
 

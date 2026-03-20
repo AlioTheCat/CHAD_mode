@@ -10,6 +10,13 @@ using namespace cv;
 using namespace std;
 
 Image::Image(const Mat rgb){
+
+	// # DOC :
+	// Constructeur
+	//	- Masque les zones fixes sur la séquence vidéo (attachées au ROV)
+	//  - Extrait la channel rouge
+	//  - Sift open_cv 
+
 	this->rgb = rgb;
 	mask();
 	extract_red_channel();
