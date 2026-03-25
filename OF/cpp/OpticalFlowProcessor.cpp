@@ -28,12 +28,22 @@ OpticalFlowProcessor::OpticalFlowProcessor(string src,
 	
 	V{src, apiPref, framerate, height, width, fourcc_}
 {
+	if (V.get_is_open()){
+		t_process = new thread(&OpticalFlowProcessor::start, this);
+		t_process->detach();
 
+		start_web();
+	}
+}
+
+OpticalFlowProcessor::OpticalFlowProcessor(string src, int apiPref):
+	V{src, apiPref}
+{
 	t_process = new thread(&OpticalFlowProcessor::start, this);
 	t_process->detach();
 
 	start_web();
-}       
+} 
 
 OpticalFlowProcessor::OpticalFlowProcessor(string src):
 	V{src}
@@ -219,7 +229,7 @@ void OpticalFlowProcessor::process() {
 		}
 	}
 
-	// Vz <-- mean_loc[milieu] (???!!!)
+	// Vz <-- median of mean_loc
 	sort(mean_loc.begin(), mean_loc.end());
 	if (mean_loc.size()%2==0){Vel[2]=(mean_loc[mean_loc.size()/2]+mean_loc[mean_loc.size()/2+1])/2;}
 	else {Vel[2]=mean_loc[mean_loc.size()/2];}
@@ -234,6 +244,7 @@ void OpticalFlowProcessor::process() {
 		y[i] = y_frame[i] - y_ref[i];
 	}
 
+	// median of deltas between frame & ref 
 	sort(x.begin(), x.end());
 	if (x.size()%2==0){Vel[0] = (x[(x.size()/2)]+x[(x.size()/2)+1])/2;}
 	else {Vel[0] = x[x.size()/2];}
@@ -243,8 +254,8 @@ void OpticalFlowProcessor::process() {
 	else {Vel[1] = y[y.size()/2];}
 
 	int n = matches.size();
+	
 	//Quality is just the number on sift point scaled between 0 and 255
-
 	qual = std::min(255, std::max(0, n/params["norm_val"]));
 
 

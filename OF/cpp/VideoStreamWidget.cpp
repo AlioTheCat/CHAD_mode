@@ -13,11 +13,14 @@ using namespace std;
 
 VideoStreamWidget::VideoStreamWidget(string src,
 					int apiPref,
-	       				int framerate, 
+	       			int framerate, 
 					int height,
 					int width,
 					string fourcc_)
 					{
+
+	std::cout << "Attempting to fetch signal from source " << src << std::endl;
+
 	cap.open(src, apiPref);
 	
 	cap.set(CAP_PROP_FPS, framerate);
@@ -30,17 +33,37 @@ VideoStreamWidget::VideoStreamWidget(string src,
 	if (cap.isOpened()) {
 		is_open=true;
 		cout<<"Camera opened"<<endl;
+		start();
 	}
 	else {
 		is_open=false;
 		cout<<"Camera not opened"<<endl;
 	}
 
-	start();
+}
+
+VideoStreamWidget::VideoStreamWidget(string src, int apiPref){
+
+	std::cout << "Attempting to fetch signal from source " << src << std::endl;
+
+	cap.open(src, apiPref);
+	
+	if (cap.isOpened()) {
+		is_open=true;
+		cout<<"Camera opened"<<endl;
+		start();
+	}
+	else {
+		is_open=false;
+		cout<<"Camera not opened"<<endl;
+	}
 
 }
 
 VideoStreamWidget::VideoStreamWidget(string src){
+
+	std::cout << "Attempting to fetch signal from source " << src << std::endl;
+
 	cap.open(src);	
 	is_video = true;	
 	if (cap.isOpened()) {
@@ -51,6 +74,10 @@ VideoStreamWidget::VideoStreamWidget(string src){
 		is_open=false;
 		cout<<"Camera not opened"<<endl;
 	}
+}
+
+bool VideoStreamWidget::get_is_open(){
+	return is_open;
 }
 
 void VideoStreamWidget::start(){

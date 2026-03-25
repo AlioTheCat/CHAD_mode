@@ -9,12 +9,15 @@ class VideoStreamWidget {
 public :
 	VideoStreamWidget()=default;
 	VideoStreamWidget(std::string src, int apiPref, int framerate, int height, int width, std::string fourcc);
+	VideoStreamWidget(std::string src, int apiPref);
 	VideoStreamWidget(std::string src);
 
 	void start();
 	void run();
 
 	int get_frame(cv::Mat &frame);
+
+	bool get_is_open();
 
 private :
 	cv::Mat frame;

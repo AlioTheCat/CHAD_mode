@@ -14,6 +14,7 @@ class OpticalFlowProcessor {
 	public :
 	OpticalFlowProcessor() = default;
 	OpticalFlowProcessor(std::string src, int apiPref, int framerate, int height, int width, std::string fourcc_);
+	OpticalFlowProcessor(std::string src, int apiPref);
 	OpticalFlowProcessor(std::string src);
 	
 	void start();
