@@ -10,6 +10,8 @@
 #include<opencv2/highgui.hpp>
 #include"Interface.h"
 #include"cpp-httplib/httplib.h"
+#include <sys/socket.h>
+
 using namespace cv;
 using namespace std;
 
@@ -139,6 +141,27 @@ void OpticalFlowProcessor::matching() {
 		}	
 	}
 
+}
+
+void OpticalFlowProcessor::send_instructions(){
+
+	// Initialize our socket (we'll probably do this only once and elsewhere)
+	int messengerSocket = socket(AF_INET, SOCK_DGRAM, 0);
+
+	// Specify the address
+	sockaddr_in rovAddress;
+	rovAddress.sin_family = AF_INET; // IPv4
+    rovAddress.sin_port = htons(8080); // The port used
+    rovAddress.sin_addr.s_addr = INADDR_ANY; // not linked to any particular IP. Since where not listening, not sure if it's relevant
+
+	// Connect to the server
+	
+	connect(messengerSocket, &rovAddress, sizeof(rovAddress));
+
+	const char* message = "Hello (under)world(er) !";
+	send(messengerSocket, message, strlen(message), 0);
+
+	close(messengerSocket);
 }
 
 void OpticalFlowProcessor::process() {

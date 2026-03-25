@@ -8,7 +8,7 @@ std::string CAMSET = "udpsrc port=5601 auto-multicast=0 ! application/x-rtp,medi
 
 
 int main() {
-    CAMSET = "udpsrc port=5601 ! application/x-rtp,media=video,encoding-name=H264 !  rtph264depay ! avdec_h264 ! videoconvert ! appsink";
+    CAMSET = "udpsrc port=42000 ! application/x-rtp,media=video,encoding-name=H264 !  rtph264depay ! avdec_h264 ! videoconvert ! appsink";
     
     
     // OpticalFlowProcessor ("/dev/video0", cv::CAP_ANY, 30, 640, 360, "H264");
