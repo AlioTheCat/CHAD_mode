@@ -48,6 +48,15 @@ class OpticalFlowProcessor {
 	
 	Interface interface{1106, '@'};	
 	
+    ////////////////// SOCKET ////////////////////
+
+    void setup_socket();
+    void setup_socket(std::string ip_Address);
+    void send_velocity();
+
+    int messengerSocket;
+	sockaddr_in rovAddress;
+
 
 	/////////////////// WEB /////////////////////////
 	void start_web();

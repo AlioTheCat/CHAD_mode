@@ -25,11 +25,9 @@ int main()
     // float message = 3.5;
     // send(clientSocket, &message, sizeof(message), 0);
     
-    const char* container [3] = {"I want", "to break", "free"};
+    const float container [3] = {3.5, 6.3, 7.8};
 
-    for (const char* msg:container) {
-        send(clientSocket, &msg, strlen(msg), 0);
-    }
+    send(clientSocket, &container, sizeof(container), 0);
 
     // closing socket
     close(clientSocket);

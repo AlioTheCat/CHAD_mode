@@ -17,9 +17,9 @@ int main() {
 
     // OpticalFlowProcessor ("udp://192.168.2.106:5601", cv::CAP_GSTREAMER, 30, 640, 360, "H264");
     
-    OpticalFlowProcessor (CAMSET, cv::CAP_GSTREAMER);
+    // OpticalFlowProcessor (CAMSET, cv::CAP_GSTREAMER);
 
-    // OpticalFlowProcessor("test_video.mp4");
+    OpticalFlowProcessor("test_video.mp4");
 
 	return 0;
 }

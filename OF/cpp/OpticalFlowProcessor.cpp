@@ -10,7 +10,11 @@
 #include<opencv2/highgui.hpp>
 #include"Interface.h"
 #include"cpp-httplib/httplib.h"
+
+#include <cstring>
+#include <netinet/in.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 using namespace cv;
 using namespace std;
@@ -30,6 +34,8 @@ OpticalFlowProcessor::OpticalFlowProcessor(string src,
 	
 	V{src, apiPref, framerate, height, width, fourcc_}
 {
+    setup_socket();
+
 	if (V.get_is_open()){
 		t_process = new thread(&OpticalFlowProcessor::start, this);
 		t_process->detach();
@@ -41,6 +47,8 @@ OpticalFlowProcessor::OpticalFlowProcessor(string src,
 OpticalFlowProcessor::OpticalFlowProcessor(string src, int apiPref):
 	V{src, apiPref}
 {
+    setup_socket();
+
 	t_process = new thread(&OpticalFlowProcessor::start, this);
 	t_process->detach();
 
@@ -50,6 +58,8 @@ OpticalFlowProcessor::OpticalFlowProcessor(string src, int apiPref):
 OpticalFlowProcessor::OpticalFlowProcessor(string src):
 	V{src}
 {
+    setup_socket();
+
 	t_process = new thread(&OpticalFlowProcessor::start, this);
 	t_process->detach();
 
@@ -90,6 +100,7 @@ void OpticalFlowProcessor::run(){
 
 			process();
 
+            send_velocity();
 
 		}
 
@@ -143,26 +154,33 @@ void OpticalFlowProcessor::matching() {
 
 }
 
-void OpticalFlowProcessor::send_instructions(){
+void OpticalFlowProcessor::setup_socket(){
+    messengerSocket = socket(AF_INET, SOCK_DGRAM, 0);    
 
-	// Initialize our socket (we'll probably do this only once and elsewhere)
-	int messengerSocket = socket(AF_INET, SOCK_DGRAM, 0);
-
-	// Specify the address
-	sockaddr_in rovAddress;
 	rovAddress.sin_family = AF_INET; // IPv4
     rovAddress.sin_port = htons(8080); // The port used
     rovAddress.sin_addr.s_addr = INADDR_ANY; // not linked to any particular IP. Since where not listening, not sure if it's relevant
 
-	// Connect to the server
-	
-	connect(messengerSocket, &rovAddress, sizeof(rovAddress));
+    // sending connection request
+    connect(messengerSocket, (struct sockaddr*)&rovAddress,
+            sizeof(rovAddress));
 
-	const char* message = "Hello (under)world(er) !";
-	send(messengerSocket, message, strlen(message), 0);
-
-	close(messengerSocket);
+    std::cout << "Socket is ready to go" << std::endl;
 }
+
+
+void OpticalFlowProcessor::send_velocity(){
+
+    int testSocket = socket(AF_INET, SOCK_DGRAM, 0);    
+
+    // sending connection request
+    connect(testSocket, (struct sockaddr*)&rovAddress,
+            sizeof(rovAddress));
+
+	send(testSocket, &Vel, sizeof(Vel), 0);
+    close(testSocket);
+}
+
 
 void OpticalFlowProcessor::process() {
 
@@ -293,7 +311,7 @@ void OpticalFlowProcessor::process() {
 
 	cout<<"Velocity : "<<Vel[0]<<", "<<Vel[1]<<", "<<Vel[2]<<" Quality : "<<qual<<endl;
 
-	interface.send(Vel, qual);
+	//interface.send(Vel, qual);
 
 	//////////////////////////////////////////////////////////
 	//			PLOT				//

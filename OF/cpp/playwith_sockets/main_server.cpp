@@ -25,18 +25,23 @@ int main()
 
     while (1) {
 
-    // listening to the assigned socket
-    listen(serverSocket, 5);
+        // listening to the assigned socket
+        listen(serverSocket, 5);
 
-    // accepting connection request
-    int clientSocket
-        = accept(serverSocket, nullptr, nullptr);
+        // await (and accept) connection request
+        int clientSocket
+            = accept(serverSocket, nullptr, nullptr);
 
-        // recieving data
-        char buffer[1024] = { 0 };
-        recv(clientSocket, buffer, sizeof(buffer), 0);
-        cout << "Message from client: " << buffer
-                << endl;
+            // recieving data
+            char buffer[12] = {};
+            char* part1 = &buffer[0];
+            char* part2 = &buffer[4];
+            char* part3 = &buffer[8];
+            recv(clientSocket, buffer, sizeof(buffer), 0);
+            cout << "Message from client: " << *reinterpret_cast<const float *>(part1) << endl
+                                            << *reinterpret_cast<const float *>(part2) << endl
+                                            << *reinterpret_cast<const float *>(part3) << endl
+                                            << endl;
     }
 
     // closing the socket.
