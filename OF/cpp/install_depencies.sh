@@ -1,0 +1,1 @@
+sudo apt install libopencv-highgui-dev libopencv-ml-dev libopencv-objdetect-dev libopencv-photo-dev libopencv-stitching-dev libopencv-video-dev libopencv-calib3d-dev libopencv-features2d-dev libopencv-dnn-dev libopencv-flann-dev libopencv-videoio-dev libopencv-imgcodecs-dev libopencv-imgproc-dev libopencv-core-dev
