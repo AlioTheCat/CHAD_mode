@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include<arpa/inet.h>
 
 using namespace std;
 
@@ -16,8 +17,8 @@ int main()
     // specifying the addressockaddr_in serverAddress;s
     sockaddr_in serverAddress;
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(8080);
-    serverAddress.sin_addr.s_addr = INADDR_ANY;
+    inet_pton(AF_INET, "192.168.2.2", &(serverAddress.sin_addr));
+    serverAddress.sin_port = htons(1106);
 
     // binding socket.
     bind(serverSocket, (struct sockaddr*)&serverAddress,
@@ -34,13 +35,17 @@ int main()
 
             // recieving data
             char buffer[12] = {};
-            char* part1 = &buffer[0];
-            char* part2 = &buffer[4];
-            char* part3 = &buffer[8];
+            float part1;
+            float part2;
+            float part3;
             recv(clientSocket, buffer, sizeof(buffer), 0);
-            cout << "Message from client: " << *reinterpret_cast<const float *>(part1) << endl
-                                            << *reinterpret_cast<const float *>(part2) << endl
-                                            << *reinterpret_cast<const float *>(part3) << endl
+
+            memcpy(&part1, buffer, 4);
+            memcpy(&part2, buffer+4, 4);
+            memcpy(&part3, buffer+8, 4);
+            cout << "Message from client: " << part1 << endl
+                                            << part2 << endl
+                                            << part3 << endl
                                             << endl;
     }
 

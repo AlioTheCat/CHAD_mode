@@ -40,7 +40,7 @@ OpticalFlowProcessor::OpticalFlowProcessor(string src,
 		t_process = new thread(&OpticalFlowProcessor::start, this);
 		t_process->detach();
 
-		start_web();
+		//start_web();
 	}
 }
 
@@ -52,7 +52,7 @@ OpticalFlowProcessor::OpticalFlowProcessor(string src, int apiPref):
 	t_process = new thread(&OpticalFlowProcessor::start, this);
 	t_process->detach();
 
-	start_web();
+	//start_web();
 } 
 
 OpticalFlowProcessor::OpticalFlowProcessor(string src):
@@ -63,7 +63,7 @@ OpticalFlowProcessor::OpticalFlowProcessor(string src):
 	t_process = new thread(&OpticalFlowProcessor::start, this);
 	t_process->detach();
 
-	start_web();
+	//start_web();
 }       
 
 void OpticalFlowProcessor::start_web(){
